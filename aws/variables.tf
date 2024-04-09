@@ -59,6 +59,18 @@ variable "database_password" {
   sensitive   = true
 }
 
+variable "redshift_user" {
+  type        = string
+  description = "The username of the Redshift cluster."
+  default     = "redshiftuser"
+}
+
+variable "redshift_password" {
+  type        = string
+  description = "The password of the Redshift cluster."
+  sensitive   = true
+}
+
 variable "docker_image" {
   description = "Docker image url used in ECS task."
   default     = "mageai/mageai:latest"

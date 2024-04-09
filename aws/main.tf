@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.50"
+      version = "~> 5.0"
     }
   }
 
@@ -175,6 +175,66 @@ resource "aws_security_group" "service_security_group" {
 
   tags = {
     Name        = "${var.app_name}-service-sg"
+    Environment = var.app_environment
+  }
+}
+
+resource "aws_s3_bucket" "data_lake" {
+  bucket = "${var.app_name}-${var.app_environment}-data-lake"
+
+  tags = {
+    Name        = "${var.app_name}-data-lake"
+    Environment = var.app_environment
+  }
+}
+
+
+# resource "aws_emr_cluster" "mage_emr_cluster" {
+#   name          = "${var.app_name}-${var.app_environment}-emr-cluster"
+#   release_label = "emr-7.0.0"
+#   applications  = ["Spark"]
+#
+#   ec2_attributes {
+#     subnet_id                         = element(aws_subnet.private.*.id, 0)
+#     emr_managed_master_security_group = aws_security_group.emr_master_sg.id
+#     emr_managed_slave_security_group  = aws_security_group.emr_slave_sg.id
+#     instance_profile                  = aws_iam_instance_profile.emr_instance_profile.arn
+#   }
+#
+#   service_role     = aws_iam_role.emr_service_role.arn
+#   autoscaling_role = aws_iam_role.emr_autoscaling_role.arn
+#
+#   master_instance_group {
+#     name           = "Master Instance Group"
+#     instance_count = 1
+#     instance_type  = "m5.xlarge"
+#   }
+#
+#   core_instance_group {
+#     name           = "Core Instance Group"
+#     instance_count = 1
+#     instance_type  = "m5.xlarge"
+#   }
+#
+#   tags = {
+#     Name        = "${var.app_name}-emr-cluster"
+#     Environment = var.app_environment
+#   }
+# }
+
+resource "aws_redshift_cluster" "data_warehouse" {
+  cluster_identifier = "${var.app_name}-${var.app_environment}-redshift-cluster"
+  database_name      = "mage_dw"
+  master_username    = var.redshift_user
+  master_password    = var.redshift_password
+  node_type          = "dc2.large"
+  cluster_type       = "multi-node"
+  number_of_nodes    = 2
+
+  skip_final_snapshot = true
+
+  tags = {
+    Name        = "${var.app_name}-redshift"
     Environment = var.app_environment
   }
 }
